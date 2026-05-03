@@ -8,8 +8,8 @@ const EMAILJS_SERVICE_ID = "";
 const EMAILJS_TEMPLATE_ID = "";
 
 // Cloudinary
-const CLOUDINARY_CLOUD_NAME = "dcipeh2fg";
-const CLOUDINARY_UPLOAD_PRESET = "18Michele";
+const CLOUDINARY_CLOUD_NAME = "";
+const CLOUDINARY_UPLOAD_PRESET = "";
 
 emailjs.init(EMAILJS_PUBLIC_KEY);
 
@@ -36,14 +36,48 @@ let uploadedURL = "";
 let canSend = false;
 let seconds = 0;
 let timerInterval = null;
+let analyser = null;
+let animationId = null;
 
 /* -------------------------------
         FUNZIONI AUSILIARIE
 --------------------------------*/
 function resetCanvas(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle = '#f7fff9';
+    ctx.fillStyle = '#f8f8fa';
     ctx.fillRect(0,0,canvas.width,canvas.height);
+}
+
+function drawWaveform(){
+    if(!analyser) return;
+    
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+    analyser.getByteFrequencyData(dataArray);
+    
+    ctx.fillStyle = '#f8f8fa';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    const barWidth = (canvas.width / bufferLength) * 2.5;
+    let barHeight;
+    let x = 0;
+    
+    ctx.fillStyle = '#6a5aaa';
+    
+    for(let i = 0; i < bufferLength; i++){
+        barHeight = (dataArray[i] / 255) * (canvas.height * 0.8);
+        ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
+        x += barWidth;
+    }
+    
+    animationId = requestAnimationFrame(drawWaveform);
+}
+
+function stopWaveformAnimation(){
+    if(animationId){
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
 }
 
 function resizeCanvas(){
@@ -99,8 +133,16 @@ startBtn.addEventListener('click', async () => {
     }catch(err){
         console.error(err);
         statusEl.textContent = '❌ Permesso microfono negato o errore: ' + err.message;
+        statusEl.classList.remove('status-hidden');
         return;
     }
+
+    // Setup audio analyser for waveform
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const source = audioContext.createMediaStreamSource(stream);
+    analyser = audioContext.createAnalyser();
+    source.connect(analyser);
+    analyser.fftSize = 256;
 
     mediaRecorder = new MediaRecorder(stream);
     audioChunks = [];
@@ -111,21 +153,25 @@ startBtn.addEventListener('click', async () => {
 
     mediaRecorder.onstart = () => {
         statusEl.textContent = '🎙️ Registrazione in corso...';
+        statusEl.classList.remove('status-hidden');
         startBtn.disabled = true;
         stopBtn.disabled = false;
         sendBtn.disabled = true;
         player.style.display = 'none';
         startTimer();
+        drawWaveform();
     };
 
     mediaRecorder.onstop = async () => {
         stopTimer();
+        stopWaveformAnimation();
         audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
         const url = URL.createObjectURL(audioBlob);
         player.src = url;
         player.load();
         player.style.display = 'block';
         statusEl.textContent = '⏳ Upload sul Cloud...';
+        statusEl.classList.remove('status-hidden');
 
         try{
             const formData = new FormData();
@@ -144,7 +190,6 @@ startBtn.addEventListener('click', async () => {
             sendBtn.disabled = false;
             canSend = true;
             startBtn.disabled = false;
-            startBtn.textContent = '🎙️ Riregistra';
         }catch(err){
             console.error(err);
             statusEl.textContent = '❌ Errore upload';
@@ -162,16 +207,19 @@ stopBtn.addEventListener('click', () => {
     if(mediaRecorder && mediaRecorder.state !== 'inactive'){
         mediaRecorder.stop();
         stopBtn.disabled = true;
+        stopWaveformAnimation();
     }
 });
 
 sendBtn.addEventListener('click', async () => {
     if(!canSend){
         statusEl.textContent = '📌 Devi registrare prima di inviare';
+        statusEl.classList.remove('status-hidden');
         return;
     }
 
     statusEl.textContent = '📤 Invio email...';
+    statusEl.classList.remove('status-hidden');
     sendBtn.disabled = true;
 
     try{
@@ -192,9 +240,13 @@ sendBtn.addEventListener('click', async () => {
         startBtn.disabled = false;
         stopBtn.disabled = true;
         sendBtn.disabled = true;
-        startBtn.textContent = '🎙️ Registra';
         timerEl.textContent = '00:00';
         resetCanvas();
+        
+        // Nascondi status dopo 3 secondi
+        setTimeout(() => {
+            statusEl.classList.add('status-hidden');
+        }, 3000);
     }catch(err){
         console.error(err);
         statusEl.textContent = '❌ Errore invio';

@@ -11,24 +11,43 @@
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 </head>
 <body>
-  <div class="card" role="main">
-    <h1>Invia messaggi vocali</h1>
-    <p class="lead">Registra e invia direttamente il tuo messaggio.</p>
-
-    <div class="controls">
-      <button id="start" class="btn primary">🎙️ Registra</button>
-      <button id="stop" class="btn ghost" disabled>⏹️ Ferma</button>
-      <button id="send" class="btn" disabled style="background:linear-gradient(90deg,#dff7ee,#bff0da)">📧 Invia</button>
-    </div>
-
-    <div class="panel">
-      <div class="left">
-        <canvas id="wave"></canvas>
-        <div id="timer">00:00</div>
-        <audio id="player" style="display:none;"></audio>
+  <div class="container" role="main">
+    <div class="card">
+      <div class="header">
+        <h1>Lascia il tuo Augurio Vocale</h1>
+        <p class="subtitle">Cattura un momento, condividi un desiderio, e diventa parte del ricordo.</p>
       </div>
-      <div class="right">
-        <div id="status">Pronto</div>
+
+      <div class="timer-display">
+        <div id="timer">00:00</div>
+      </div>
+
+      <div class="waveform-container">
+        <canvas id="wave"></canvas>
+      </div>
+
+      <div class="record-button-wrapper">
+        <button id="start" class="record-btn">
+          <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+        <div class="button-label">REGISTRA</div>
+      </div>
+
+      <div class="controls">
+        <button id="stop" class="btn stop-btn" disabled>⏹ Ferma</button>
+        <button id="send" class="btn send-btn" disabled>▶ Invia</button>
+      </div>
+
+      <div id="status" class="status-hidden"></div>
+      <audio id="player" style="display:none;"></audio>
+
+      <div class="footer-note">
+        <p>Il tuo messaggio verrà aggiunto all'album digitale.</p>
       </div>
     </div>
   </div>
