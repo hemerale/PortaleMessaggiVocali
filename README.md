@@ -29,7 +29,7 @@ Per utilizzare il progetto sul tuo ambiente locale:
 
 1. Clona la repository:
    ```bash
-   git clone https://github.com/hemerale/PortaleMessaggiVocali.git
+   git clone https://github.com/hemerale/VoicePortal.git
 2. Configura EmailJS con le tue credenziali:
    - `EMAILJS_PUBLIC_KEY`
    - `EMAILJS_SERVICE_ID`
