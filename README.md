@@ -3,10 +3,6 @@
 Si tratta di un portale web che permette agli utenti di registrare messaggi vocali e inviarli direttamente via email.  
 Il progetto è stato creato per un evento, offrendo un modo semplice e rapido per condividere messaggi vocali senza la necessità di scaricare applicazioni aggiuntive. <br>
 
-## 🌐 Prova online
-
-Puoi testare il portale direttamente dal sito: [hemerale.github.io/PortaleMessaggiVocali](https://hemerale.github.io/PortaleMessaggiVocali)  
-
 ---
 
 ## Funzionalità
